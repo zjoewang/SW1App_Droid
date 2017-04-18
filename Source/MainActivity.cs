@@ -15,8 +15,6 @@ using Android.Widget;
 using System.Globalization;
 using System.Threading;
 
-[assembly: UsesFeature ("android.hardware.usb.host")]
-
 namespace ESB
 {
 	[Activity (Label = "@string/app_name", MainLauncher = true, Icon = "@drawable/esblogo")]
@@ -29,23 +27,31 @@ namespace ESB
 		ProgressBar progressBar;
         Button buttonData;
         Button buttonChart;
+        private ArrayAdapter<string> listAdapter;
+        private IHeartRateEnumerator _hrEnumerator;
 
-		protected override void OnCreate (Bundle bundle)
+        protected override void OnCreate(Bundle bundle)
 		{
 			base.OnCreate(bundle);
 
 			SetContentView(Resource.Layout.Main);
 
+            listAdapter = new ArrayAdapter<string>(this, Resource.Id.textInfo);
             this.Title += " (ver " + build_number + ")";
 
 			listView = FindViewById<ListView>(Resource.Id.deviceList);
-			progressBar = FindViewById<ProgressBar>(Resource.Id.progressBar);
+            listView.Adapter = listAdapter;
+            progressBar = FindViewById<ProgressBar>(Resource.Id.progressBar);
 			progressBarTitle = FindViewById<TextView>(Resource.Id.progressBarTitle);
             buttonData = FindViewById<Button>(Resource.Id.button1);
             buttonChart = FindViewById<Button>(Resource.Id.button2);
+
+            listView.ItemClick += async (sender, e) => {
+                await OnItemClick(sender, e);
+            };
         }
 
-		protected override async void OnResume ()
+        protected override async void OnResume()
 		{
 			base.OnResume ();
 
@@ -60,27 +66,47 @@ namespace ESB
             buttonChart.Click += async (sender, e) => {
                 await OnButtonChartClicked(sender, e);
             };
-
-            await PopulateListAsync();
 		}
 
         async Task OnButtonDataClicked(object sender, EventArgs e)
         {
-            /*
-            var permissionGranted = await usbManager.RequestPermissionAsync(selectedPort.Driver.Device, this);
-            if (permissionGranted)
+            if (_hrEnumerator == null)
             {
-                // start the SerialConsoleActivity for this device
-                var intendDataView = new Intent(this, typeof(DataViewActivity));
-                intendDataView.PutExtra(DataViewActivity.EXTRA_TAG, new UsbSerialPortInfo(selectedPort));
-                StartActivity(intendDataView);
+                progressBar.Visibility = ViewStates.Visible;
+
+                _hrEnumerator = new HeartRateEnumeratorAndroid();
+                _hrEnumerator.DeviceScanUpdate += _hrEnumerator_DeviceScanUpdate;
+                _hrEnumerator.DeviceScanTimeout += _hrEnumerator_DeviceScanTimeout;
+                _hrEnumerator.StartDeviceScan();
+
+                listAdapter.Clear();
+                listAdapter.Add($"> ble start");
             }
-            */
+        }
+ 
+        private void _hrEnumerator_DeviceScanTimeout(object sender, EventArgs e)
+        {
+            listAdapter.Add($"> timeout {sender.GetType().ToString()}");
+            OnButtonChartClicked(sender, e);
+        }
+
+        private void _hrEnumerator_DeviceScanUpdate(object sender, string deviceName)
+        {
+            listAdapter.Add($"{sender.GetType().ToString()}:{deviceName}");
         }
 
         async Task OnButtonChartClicked(object sender, EventArgs e)
         {
-            ;
+            progressBar.Visibility = ViewStates.Invisible;
+
+            if (_hrEnumerator != null)
+            {
+                _hrEnumerator.DeviceScanUpdate -= _hrEnumerator_DeviceScanUpdate;
+                _hrEnumerator.DeviceScanTimeout -= _hrEnumerator_DeviceScanTimeout;
+                _hrEnumerator.StopDeviceScan();
+                _hrEnumerator = null;
+                listAdapter.Add($"> ble stop");
+            }
         }
 
         protected override void OnPause()
@@ -97,42 +123,15 @@ namespace ESB
 		async Task OnItemClick(object sender, AdapterView.ItemClickEventArgs e)
 		{
 			Log.Info(TAG, "Pressed item " + e.Position);
-		}
 
-		async Task PopulateListAsync ()
-		{
-            /*
-			ShowProgressBar ();
+            await OnButtonChartClicked(sender, e);
 
-			Log.Info (TAG, "Refreshing device list ...");
+            string selected = (string)listView.GetItemAtPosition(e.Position);
 
-			var drivers = await FindAllDriversAsync (usbManager);
-
-			adapter.Clear ();
-			foreach (var driver in drivers) {
-				var ports = driver.Ports;
-				Log.Info (TAG, string.Format ("+ {0}: {1} port{2}", driver, ports.Count, ports.Count == 1 ? string.Empty : "s"));
-				foreach(var port in ports)
-					adapter.Add (port);
-			}
-
-			adapter.NotifyDataSetChanged();
-			progressBarTitle.Text = string.Format("{0} device{1} found", adapter.Count, adapter.Count == 1 ? string.Empty : "s");
-			HideProgressBar();
-			Log.Info(TAG, "Done refreshing, " + adapter.Count + " entries found.");
-
-            if (adapter.Count == 1)
-            {
-                buttonData.Enabled = true;
-                buttonChart.Enabled = true;
-            }
-            else
-            {
-                buttonData.Enabled = false;
-                buttonChart.Enabled = false;
-            }
-            */
-		}
+            var activityHeart = new Intent(this, typeof(HeartActivity));
+            activityHeart.PutExtra($"device", selected);
+            StartActivity(activityHeart);
+        }
 
 		void ShowProgressBar()
 		{

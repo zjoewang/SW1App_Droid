@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+  <GridLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:numColumns="3"
+      android:rowCount="2" >
+
+    <Button
+        android:id="@+id/button_start_hr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="start"
+        android:layout_column="0"
+        android:layout_row="0"
+            />
+    <Button
+        android:id="@+id/button_stop_hr"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="stop"
+        android:layout_column="1"
+        android:layout_row="0"
+            />
+    <ProgressBar
+        android:id="@+id/progress_work"
+        style="@android:style/Widget.DeviceDefault.ProgressBar.Large"
+        android:layout_width="41dp"
+        android:layout_height="42dp"
+        android:layout_column="2"
+        android:layout_row="0"
+        android:indeterminate="true"
+        android:visibility="invisible"/>
+  </GridLayout>
+  <TextView
+      android:text="----"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:id="@+id/textDeviceName" />
+  <TextView
+      android:text="----"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:id="@+id/textNow" />
+  <TextView
+      android:text="hr value"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:textAlignment="center" />
+  <TextView
+      android:text="---"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:id="@+id/textHR"
+      android:textSize="120sp"
+      android:textAlignment="center"
+      android:textStyle="normal|bold" />
+  <TextView
+      android:text="-#-#-"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:id="@+id/textInfo" />
+  <TextView
+      android:text="battery"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:textAlignment="center" />
+  <TextView
+      android:text="---"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:id="@+id/textBattery"
+      android:textSize="30sp"
+      android:textAlignment="center" />
+  <TextView
+      android:text="-#-#-"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:id="@+id/textInfo2" />
+</LinearLayout>

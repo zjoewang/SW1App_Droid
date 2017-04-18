@@ -68,6 +68,14 @@
       <HintPath>..\packages\OxyPlot.Xamarin.Android.1.0.0\lib\MonoAndroid10\OxyPlot.Xamarin.Android.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Plugin.BLE, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Plugin.BLE.1.0.0\lib\MonoAndroid\Plugin.BLE.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Plugin.BLE.Abstractions, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Plugin.BLE.1.0.0\lib\MonoAndroid\Plugin.BLE.Abstractions.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
@@ -76,6 +84,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChartViewActivity.cs" />
+    <Compile Include="HeartActivity.cs" />
+    <Compile Include="HeartRateAndroidBLE.cs" />
+    <Compile Include="HeartRateEnumeratorAndroid.cs" />
+    <Compile Include="IHeartRate.cs" />
+    <Compile Include="IHeartRateEnumerator.cs" />
     <Compile Include="ParseLog.cs" />
     <Compile Include="Resources\Resource.designer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -95,7 +108,6 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\values\Strings.xml" />
-    <AndroidResource Include="Resources\xml\device_filter.xml" />
     <AndroidResource Include="Resources\layout\Main.axml" />
     <AndroidResource Include="Resources\layout\LogView.axml" />
     <AndroidResource Include="Resources\drawable-hdpi\icon.png" />
@@ -119,5 +131,8 @@
   </ItemGroup>
   <ItemGroup>
     <AndroidResource Include="Resources\drawable-xxhdpi\esblogo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AndroidResource Include="Resources\layout\Heart.xml" />
   </ItemGroup>
 </Project>
