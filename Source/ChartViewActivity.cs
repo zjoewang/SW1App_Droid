@@ -4,21 +4,16 @@
 using System;
 using Android.App;
 using Android.Content;
-using Android.Views;
-using Android.Widget;
 using Android.OS;
 using OxyPlot;
 using OxyPlot.Series;
 using OxyPlot.Xamarin.Android;
 using Android.Content.PM;
-using Android.Graphics;
 using Android.Hardware.Usb;
 using Android.Util;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using Hoho.Android.UsbSerial.Driver;
-using Hoho.Android.UsbSerial.Util;
 using OxyPlot.Axes;
 
 namespace ESB
@@ -34,9 +29,6 @@ namespace ESB
         private PlotView plotViewModel;
         public PlotModel MyModel { get; set; }
 
-        UsbManager usbManager;
-        IUsbSerialPort port;
-
         LineSeries seriesHR;
         LineSeries seriesSP;
 
@@ -49,7 +41,6 @@ namespace ESB
 
         string input_line;
 
-        SerialInputOutputManager serialIoManager;
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -59,9 +50,6 @@ namespace ESB
 
             // Set our view from the "main" layout resource
             SetContentView(Resource.Layout.ChartView);
-
-            usbManager = GetSystemService(Context.UsbService) as UsbManager;
-
             plotViewModel = FindViewById<PlotView>(Resource.Id.plotViewModel);
 
             var plotModel1 = new PlotModel();
@@ -129,21 +117,7 @@ namespace ESB
         protected override void OnPause()
         {
             Log.Info(TAG, "OnPause");
-
             base.OnPause();
-
-            if (serialIoManager != null && serialIoManager.IsOpen)
-            {
-                Log.Info(TAG, "Stopping IO manager ..");
-                try
-                {
-                    serialIoManager.Close();
-                }
-                catch (Java.IO.IOException)
-                {
-                    // ignore
-                }
-            }
         }
 
         protected async override void OnResume()
@@ -151,64 +125,6 @@ namespace ESB
             Log.Info(TAG, "OnResume");
 
             base.OnResume();
-
-            input_line = "";
-
-            var portInfo = Intent.GetParcelableExtra(EXTRA_TAG) as UsbSerialPortInfo;
-            int vendorId = portInfo.VendorId;
-            int deviceId = portInfo.DeviceId;
-            int portNumber = portInfo.PortNumber;
-
-            Log.Info(TAG, string.Format("VendorId: {0} DeviceId: {1} PortNumber: {2}", vendorId, deviceId, portNumber));
-
-            var drivers = await MainActivity.FindAllDriversAsync(usbManager);
-            var driver = drivers.Where((d) => d.Device.VendorId == vendorId && d.Device.DeviceId == deviceId).FirstOrDefault();
-            if (driver == null)
-                throw new Exception("Driver specified in extra tag not found.");
-
-            port = driver.Ports[portNumber];
-            if (port == null)
-            {
-                MyModel.Title = "No serial device.";
-                return;
-            }
-            Log.Info(TAG, "port=" + port);
-
-            MyModel.Title = "Serial device: " + port.GetType().Name;
-
-            serialIoManager = new SerialInputOutputManager(port)
-            {
-                BaudRate = 9600,
-                DataBits = 8,
-                StopBits = StopBits.One,
-                Parity = Parity.None,
-            };
-            serialIoManager.DataReceived += (sender, e) => {
-                RunOnUiThread(() => {
-                    UpdateReceivedData(e.Data);
-                });
-            };
-            serialIoManager.ErrorReceived += (sender, e) => {
-                RunOnUiThread(() => {
-                    var intent = new Intent(this, typeof(MainActivity));
-                    StartActivity(intent);
-                });
-            };
-
-            Log.Info(TAG, "Starting IO manager ..");
-            try
-            {
-                serialIoManager.Open(usbManager);
-                Thread.Sleep(2000);
-                byte[] cmd = Encoding.ASCII.GetBytes("  ");
-                port.Write(cmd, 1000);
-                Thread.Sleep(1000);
-            }
-            catch (Java.IO.IOException e)
-            {
-                MyModel.Title = "Error opening device: " + e.Message;
-                return;
-            }
         }
 
         void UpdateReceivedData(byte[] data)
