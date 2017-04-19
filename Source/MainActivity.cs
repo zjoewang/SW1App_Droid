@@ -17,17 +17,42 @@ using System.Threading;
 
 namespace ESB
 {
-	[Activity (Label = "@string/app_name", MainLauncher = true, Icon = "@drawable/esblogo")]
+    class UsbSerialPortAdapter : ArrayAdapter<string>
+    {
+        public UsbSerialPortAdapter(Context context)
+            : base(context, global::Android.Resource.Layout.SimpleExpandableListItem2)
+        {
+        }
+
+        public override View GetView(int position, View convertView, ViewGroup parent)
+        {
+            var row = convertView;
+            if (row == null)
+            {
+                var inflater = Context.GetSystemService(Context.LayoutInflaterService) as LayoutInflater;
+                row = inflater.Inflate(global::Android.Resource.Layout.SimpleListItem2, null);
+            }
+
+            var name = this.GetItem(position);
+  
+            row.FindViewById<TextView>(global::Android.Resource.Id.Text1).Text = name;
+            row.FindViewById<TextView>(global::Android.Resource.Id.Text2).Text = name;
+
+            return row;
+        }
+    }
+
+    [Activity (Label = "@string/app_name", MainLauncher = true, Icon = "@drawable/esblogo")]
 	class MainActivity : Activity
 	{
 		static readonly string TAG = typeof(MainActivity).Name;
-        string build_number = "0.815";
+        string build_number = "0.005";
 		ListView listView;
 		TextView progressBarTitle;
 		ProgressBar progressBar;
         Button buttonData;
         Button buttonChart;
-        private ArrayAdapter<string> listAdapter;
+        private UsbSerialPortAdapter listAdapter;
         private IHeartRateEnumerator _hrEnumerator;
 
         protected override void OnCreate(Bundle bundle)
@@ -36,8 +61,9 @@ namespace ESB
 
 			SetContentView(Resource.Layout.Main);
 
-            listAdapter = new ArrayAdapter<string>(this, Resource.Id.textInfo);
-            this.Title += " (ver " + build_number + ")";
+            listAdapter = new UsbSerialPortAdapter(this);
+
+            this.Title += " (ver " + build_number + ")"; ;
 
 			listView = FindViewById<ListView>(Resource.Id.deviceList);
             listView.Adapter = listAdapter;
