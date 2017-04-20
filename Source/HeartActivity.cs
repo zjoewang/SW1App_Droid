@@ -103,8 +103,7 @@ namespace ESB
 
             if (split[0] == BLE)
             {
-                var enumerator = new HeartRateEnumeratorAndroid();
-                _heartRate = enumerator.GetHeartRate(split[1]);
+                _heartRate = HeartRateEnumeratorAndroid._GetHeartRate(split[1]);
                 _heartRate.Start();
                 _progressWorking.Visibility = ViewStates.Visible;
             }

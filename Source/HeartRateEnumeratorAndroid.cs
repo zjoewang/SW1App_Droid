@@ -74,10 +74,15 @@ namespace ESB
             return true;
         }
 
-        public IHeartRate GetHeartRate(string name)
+        static public IHeartRate _GetHeartRate(string name)
         {
             var hr = new HeartRateAndroidBLE(name);
             return hr;
+        }
+
+        public IHeartRate GetHeartRate(string name)
+        {
+            return HeartRateEnumeratorAndroid._GetHeartRate(name);
         }
     }
 }

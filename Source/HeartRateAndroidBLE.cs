@@ -282,7 +282,15 @@ namespace ESB
                 int heartValue;
                 var bytes = args.Characteristic.Value;
 
-                heartValue = bytes[1];
+                byte flags = bytes[0];
+
+                if ((flags & 0x1) == 0x1)
+                {
+                    // heart beat is 16 bits
+                    heartValue = bytes[1] | (bytes[2] << 8);
+                }
+                else
+                    heartValue = bytes[1];
 
                 if (_currentValue == null)
                 {

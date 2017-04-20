@@ -27,6 +27,7 @@ namespace ESB
         public override View GetView(int position, View convertView, ViewGroup parent)
         {
             var row = convertView;
+
             if (row == null)
             {
                 var inflater = Context.GetSystemService(Context.LayoutInflaterService) as LayoutInflater;
@@ -36,7 +37,7 @@ namespace ESB
             var name = this.GetItem(position);
   
             row.FindViewById<TextView>(global::Android.Resource.Id.Text1).Text = name;
-            row.FindViewById<TextView>(global::Android.Resource.Id.Text2).Text = name;
+            // row.FindViewById<TextView>(global::Android.Resource.Id.Text2).Text = name;
 
             return row;
         }
@@ -69,6 +70,7 @@ namespace ESB
             listView.Adapter = listAdapter;
             progressBar = FindViewById<ProgressBar>(Resource.Id.progressBar);
 			progressBarTitle = FindViewById<TextView>(Resource.Id.progressBarTitle);
+            HideProgressBar();
             buttonData = FindViewById<Button>(Resource.Id.button1);
             buttonChart = FindViewById<Button>(Resource.Id.button2);
 
@@ -98,7 +100,7 @@ namespace ESB
         {
             if (_hrEnumerator == null)
             {
-                progressBar.Visibility = ViewStates.Visible;
+                ShowProgressBar();
 
                 _hrEnumerator = new HeartRateEnumeratorAndroid();
                 _hrEnumerator.DeviceScanUpdate += _hrEnumerator_DeviceScanUpdate;
@@ -118,15 +120,15 @@ namespace ESB
 
         private void _hrEnumerator_DeviceScanUpdate(object sender, string deviceName)
         {
-            listAdapter.Add($"{sender.GetType().ToString()}:{deviceName}");
+            if (deviceName != null)
+                listAdapter.Add($"{sender.GetType().ToString()}:{deviceName}");
         }
 
         async Task OnButtonChartClicked(object sender, EventArgs e)
         {
-            progressBar.Visibility = ViewStates.Invisible;
-
             if (_hrEnumerator != null)
             {
+                HideProgressBar();
                 _hrEnumerator.DeviceScanUpdate -= _hrEnumerator_DeviceScanUpdate;
                 _hrEnumerator.DeviceScanTimeout -= _hrEnumerator_DeviceScanTimeout;
                 _hrEnumerator.StopDeviceScan();
@@ -167,7 +169,8 @@ namespace ESB
 
 		void HideProgressBar()
 		{
-			progressBar.Visibility = ViewStates.Invisible;
+            progressBarTitle.Text = "";
+            progressBar.Visibility = ViewStates.Invisible;
 		}
 	}
 }
