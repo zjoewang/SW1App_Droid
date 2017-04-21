@@ -283,14 +283,20 @@ namespace ESB
                 var bytes = args.Characteristic.Value;
 
                 byte flags = bytes[0];
+                int header;
 
                 if ((flags & 0x1) == 0x1)
                 {
-                    // heart beat is 16 bits
-                    heartValue = bytes[1] | (bytes[2] << 8);
+                    // HB data is 16 bits (bytes[2][bytes[1] since it's LSB first)
+                    header = (bytes[2] >> 4);        // First 4 bits
+                    heartValue = bytes[1] | (0xF & bytes[2]);       // Next 12
                 }
                 else
+                {
+                    header = 0;
                     heartValue = bytes[1];
+                    System.Diagnostics.Debug.Assert(false);
+                }
 
                 if (_currentValue == null)
                 {
