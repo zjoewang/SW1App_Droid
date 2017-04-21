@@ -156,7 +156,7 @@ namespace ESB
 
             string selected = (string)listView.GetItemAtPosition(e.Position);
 
-            var activityHeart = new Intent(this, typeof(HeartActivity));
+            var activityHeart = new Intent(this, typeof(ChartViewActivity));
             activityHeart.PutExtra($"device", selected);
             StartActivity(activityHeart);
         }

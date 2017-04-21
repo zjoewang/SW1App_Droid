@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 namespace ESB
 {
@@ -17,5 +18,6 @@ namespace ESB
         bool IsRunning { get; }
         void Stop();
         HeartRateData GetCurrentHeartRateValue();
+        void SetUpdateFunc(Func<int, int, Task> func);
     }
 }

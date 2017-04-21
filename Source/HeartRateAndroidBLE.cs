@@ -46,6 +46,8 @@ namespace ESB
         };
         private Status _status;
 
+        private Func<int, int, Task> _update_func = null;
+
         public HeartRateAndroidBLE(string deviceName)
         {
             _deviceName = deviceName;
@@ -75,6 +77,11 @@ namespace ESB
             return true;
         }
 
+        // First int is 4-bit header, second int is 12-bit value
+        public void SetUpdateFunc(Func<int, int, Task> func)
+        {
+            _update_func = func;
+        }
 
         public bool IsRunning
         {
@@ -287,9 +294,12 @@ namespace ESB
 
                 if ((flags & 0x1) == 0x1)
                 {
-                    // HB data is 16 bits (bytes[2][bytes[1] since it's LSB first)
+                    // HB data is 16 bits (bytes[2]bytes[1] since it's LSB first)
                     header = (bytes[2] >> 4);        // First 4 bits
                     heartValue = bytes[1] | (0xF & bytes[2]);       // Next 12
+
+                    if (_update_func != null)
+                        await _update_func(header, heartValue);
                 }
                 else
                 {
