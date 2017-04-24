@@ -296,7 +296,7 @@ namespace ESB
                 {
                     // HB data is 16 bits (bytes[2]bytes[1] since it's LSB first)
                     header = (bytes[2] >> 4);        // First 4 bits
-                    heartValue = bytes[1] | (0xF & bytes[2]);       // Next 12
+                    heartValue = bytes[1] | ((0xF & bytes[2]) << 8);       // Next 12
 
                     if (_update_func != null)
                         await _update_func(header, heartValue);

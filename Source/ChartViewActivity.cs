@@ -31,6 +31,7 @@ namespace ESB
         int curHR = -1;
         int curSP = -1;
         int curTS = 0;
+        double curTemp = 0;
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -158,8 +159,6 @@ namespace ESB
 
         void UpdateUI(int header, int val)
         {
-            double temp = 0;
-
             if (header == 0)
             {
                 curHR = val;
@@ -169,10 +168,10 @@ namespace ESB
             else if (header == 1)
             {
                 curSP = val;
-                seriesHR.Points.Add(new DataPoint(curTS, curSP));
+                seriesSP.Points.Add(new DataPoint(curTS, curSP));
             }
             else if (header == 2)
-                temp = (double) val / 10.0;     // val is in 1/10th Fehrenhait unit
+                curTemp = (double) val / 10.0;     // val is in 1/10th Fehrenhait unit
 
             // Thnning data so we don't accumulate too much historical data
             if (seriesHR.Points.Count > 200)
@@ -182,7 +181,7 @@ namespace ESB
             }
 
             MyModel.Title = string.Format("HR = {0} bpm, SP = {1}%", curHR, curSP);
-            MyModel.Subtitle = $"T = {temp} F";
+            MyModel.Subtitle = string.Format($"T = {curTemp} F");
             MyModel.InvalidatePlot(true);
         }
     }

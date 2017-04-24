@@ -40,7 +40,7 @@
         android:layout_centerHorizontal="true"
         android:background="#eeeeee" />
     <Button
-        android:text="Data View"
+        android:text="Start Scan (BT should be on)"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/separator2"
@@ -53,7 +53,7 @@
         android:layout_centerHorizontal="true"
         android:background="#eeeeee" />
     <Button
-        android:text="Chart View"
+        android:text="Stop the Scan"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/separator3"
