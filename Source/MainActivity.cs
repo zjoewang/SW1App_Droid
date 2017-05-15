@@ -17,9 +17,9 @@ using System.Threading;
 
 namespace ESB
 {
-    class UsbSerialPortAdapter : ArrayAdapter<string>
+    class USBDeviceListAdapter : ArrayAdapter<string>
     {
-        public UsbSerialPortAdapter(Context context)
+        public USBDeviceListAdapter(Context context)
             : base(context, global::Android.Resource.Layout.SimpleExpandableListItem2)
         {
         }
@@ -53,7 +53,7 @@ namespace ESB
 		ProgressBar progressBar;
         Button buttonData;
         Button buttonChart;
-        private UsbSerialPortAdapter listAdapter;
+        private USBDeviceListAdapter listAdapter;
         private IHeartRateEnumerator _hrEnumerator;
 
         protected override void OnCreate(Bundle bundle)
@@ -62,7 +62,7 @@ namespace ESB
 
 			SetContentView(Resource.Layout.Main);
 
-            listAdapter = new UsbSerialPortAdapter(this);
+            listAdapter = new USBDeviceListAdapter(this);
 
             this.Title += " (ver " + build_number + ")"; ;
 
