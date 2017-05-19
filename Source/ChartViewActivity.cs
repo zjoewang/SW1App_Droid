@@ -21,18 +21,21 @@ namespace ESB
     public class ChartViewActivity : Activity
     {
         static readonly string TAG = typeof(ChartViewActivity).Name;
-        static PlotView plotViewModelView = null;
-        static private PlotModel plotModel;
         private string _deviceName;
+        static private PlotModel _plotModel;
         static LineSeries seriesHR;
         static LineSeries seriesSP;
-
         private IHeartRate _heartRate;
-        public PlotModel MyModel { get; set; }
-        int curHR = -1;
-        int curSP = -1;
-        int curTS = 0;
-        double curTemp = 0;
+        public PlotModel MyModel {
+            get { return _plotModel; }
+            set { ChartViewActivity._plotModel = value; }
+        }
+        PlotView plotView = null;
+        static int curHR = -1;
+        static int curSP = -1;
+        static int curTS = 0;
+        static double curTemp = 0;
+        private PowerManager.WakeLock wakeLock;
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -42,21 +45,19 @@ namespace ESB
             _deviceName = Intent.GetStringExtra("device") ?? "---";
 
             var powerManager = (PowerManager)ApplicationContext.GetSystemService(Context.PowerService);
-            var wakeLock = powerManager.NewWakeLock(WakeLockFlags.Partial, "myNicolLock");
+            wakeLock = powerManager.NewWakeLock(WakeLockFlags.Partial, "myNicolLock");
             wakeLock.Acquire();
 
-            if (plotViewModelView == null)
+            if (_plotModel == null)
             {
-                plotViewModelView = FindViewById<PlotView>(Resource.Id.plotViewModel);
+                _plotModel = new PlotModel();
 
-                plotModel = new PlotModel();
-
-                plotModel.PlotMargins = new OxyThickness(40, 40, 40, 40);
-                plotModel.Background = OxyColors.Black;
-                plotModel.TitleFontSize = 40;
-                plotModel.TitleColor = OxyColors.Green;
-                plotModel.SubtitleFontSize = 24;
-                plotModel.TextColor = OxyColors.White;
+                _plotModel.PlotMargins = new OxyThickness(40, 40, 40, 40);
+                _plotModel.Background = OxyColors.Black;
+                _plotModel.TitleFontSize = 40;
+                _plotModel.TitleColor = OxyColors.Green;
+                _plotModel.SubtitleFontSize = 24;
+                _plotModel.TextColor = OxyColors.White;
 
                 var linearAxisLeft = new LinearAxis();
 
@@ -70,7 +71,7 @@ namespace ESB
                 linearAxisLeft.AxislineColor = OxyColors.Magenta;
                 linearAxisLeft.TextColor = OxyColors.Magenta;
                 linearAxisLeft.TitleColor = OxyColors.Magenta;
-                plotModel.Axes.Add(linearAxisLeft);
+                _plotModel.Axes.Add(linearAxisLeft);
 
                 var linearAxisRight = new LinearAxis();
 
@@ -84,7 +85,7 @@ namespace ESB
                 linearAxisRight.AxislineColor = OxyColors.Yellow;
                 linearAxisRight.TitleColor = OxyColors.Yellow;
                 linearAxisRight.TextColor = OxyColors.Yellow;
-                plotModel.Axes.Add(linearAxisRight);
+                _plotModel.Axes.Add(linearAxisRight);
 
                 seriesHR = new LineSeries
                 {
@@ -99,10 +100,7 @@ namespace ESB
                           StrokeThickness = 5
                 };
 
-                plotModel.Series.Add(seriesHR);
-
-                MyModel = plotModel;
-                plotViewModelView.Model = MyModel;
+                _plotModel.Series.Add(seriesHR);
 
                 seriesSP = new LineSeries()
                 {
@@ -117,16 +115,23 @@ namespace ESB
                           StrokeThickness = 5
                 };
 
-                plotModel.Series.Add(seriesSP);
+                _plotModel.Series.Add(seriesSP);
             }
 
+            plotView = FindViewById<PlotView>(Resource.Id.plotViewModel);
+    
+            if (plotView.Model == null)
+                plotView.Model = _plotModel;
+
             Button_start_hr_Click(null, null);
+
+            MyModel.InvalidatePlot(true);
         }
 
         protected override void OnDestroy()
         {
+            wakeLock.Release();
             _heartRate?.Stop();
-
             base.OnDestroy();
         }
 

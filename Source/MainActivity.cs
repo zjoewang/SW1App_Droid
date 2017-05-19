@@ -47,7 +47,7 @@ namespace ESB
 	class MainActivity : Activity
 	{
 		static readonly string TAG = typeof(MainActivity).Name;
-        string build_number = "0.005";
+        string build_number = "0.008";
 		ListView listView;
 		TextView progressBarTitle;
 		ProgressBar progressBar;
