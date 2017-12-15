@@ -20,18 +20,22 @@ namespace ESB
     [Activity(Label = "@string/app_name", LaunchMode = LaunchMode.SingleTop)]
     public class ChartViewActivity : Activity
     {
-        private string _deviceName;
-
-        private IHeartRate _heartRate;
         static readonly string TAG = typeof(ChartViewActivity).Name;
-        private PlotView plotViewModel;
-        public PlotModel MyModel { get; set; }
-        LineSeries seriesHR;
-        LineSeries seriesSP;
-        int curHR = -1;
-        int curSP = -1;
-        int curTS = 0;
-        double curTemp = 0;
+        private string _deviceName;
+        static private PlotModel _plotModel;
+        static LineSeries seriesHR;
+        static LineSeries seriesSP;
+        private IHeartRate _heartRate;
+        public PlotModel MyModel {
+            get { return _plotModel; }
+            set { ChartViewActivity._plotModel = value; }
+        }
+        PlotView plotView = null;
+        static int curHR = -1;
+        static int curSP = -1;
+        static int curTS = 0;
+        static double curTemp = 0;
+        private PowerManager.WakeLock wakeLock;
 
         protected override void OnCreate(Bundle bundle)
         {
@@ -41,79 +45,93 @@ namespace ESB
             _deviceName = Intent.GetStringExtra("device") ?? "---";
 
             var powerManager = (PowerManager)ApplicationContext.GetSystemService(Context.PowerService);
-            var wakeLock = powerManager.NewWakeLock(WakeLockFlags.Partial, "myNicolLock");
+            wakeLock = powerManager.NewWakeLock(WakeLockFlags.Partial, "myNicolLock");
             wakeLock.Acquire();
 
-            plotViewModel = FindViewById<PlotView>(Resource.Id.plotViewModel);
-
-            var plotModel1 = new PlotModel();
-
-            plotModel1.PlotMargins = new OxyThickness(40, 40, 40, 40);
-            plotModel1.Background = OxyColors.Black;
-            plotModel1.TitleFontSize = 40;
-            plotModel1.TitleColor = OxyColors.Green;
-            plotModel1.SubtitleFontSize = 24;
-            plotModel1.TextColor = OxyColors.White;
-
-            var linearAxis1 = new LinearAxis();
-            linearAxis1.MajorGridlineStyle = LineStyle.Solid;
-            linearAxis1.MinorGridlineStyle = LineStyle.Dot;
-            linearAxis1.Title = "HR";
-            linearAxis1.Key = "HR";
-            linearAxis1.Position = AxisPosition.Left;
-            linearAxis1.Minimum = 10.0;
-            linearAxis1.Maximum = 250.0;
-            plotModel1.Axes.Add(linearAxis1);
-            var linearAxis2 = new LinearAxis();
-            linearAxis2.MajorGridlineStyle = LineStyle.Solid;
-            linearAxis2.MinorGridlineStyle = LineStyle.Dot;
-            linearAxis2.Position = AxisPosition.Right;
-            linearAxis2.Title = "%SpO2";
-            linearAxis2.Key = "SP";
-            linearAxis2.Minimum = 50.0;
-            linearAxis2.Maximum = 100.0;
-            plotModel1.Axes.Add(linearAxis2);
-
-            seriesHR = new LineSeries
+            if (_plotModel == null)
             {
-                Title = "Heart Rate (bpm)",
-                Color = OxyColors.Magenta,
-                MarkerType = MarkerType.Circle,
-                MarkerSize = 3,
-                MarkerStroke = OxyColors.Magenta,
-                MarkerFill = OxyColors.Magenta,
-                YAxisKey = "HR",
-                MarkerStrokeThickness = 1.0,
-                StrokeThickness = 5
-            };
+                _plotModel = new PlotModel();
 
-            plotModel1.Series.Add(seriesHR);
+                _plotModel.PlotMargins = new OxyThickness(40, 40, 40, 40);
+                _plotModel.Background = OxyColors.Black;
+                _plotModel.TitleFontSize = 40;
+                _plotModel.TitleColor = OxyColors.Green;
+                _plotModel.SubtitleFontSize = 24;
+                _plotModel.TextColor = OxyColors.White;
 
-            MyModel = plotModel1;
-            plotViewModel.Model = MyModel;
+                var linearAxisLeft = new LinearAxis();
 
-            seriesSP = new LineSeries()
-            {
-                Title = "Oxygen Saturation Level (%)",
-                Color = OxyColors.Yellow,
-                MarkerType = MarkerType.Circle,
-                MarkerSize = 3,
-                MarkerStroke = OxyColors.Yellow,
-                MarkerFill = OxyColors.Yellow,
-                YAxisKey = "SP",
-                MarkerStrokeThickness = 1.0,
-                StrokeThickness = 5
-            };
+                linearAxisLeft.MajorGridlineStyle = LineStyle.Solid;
+                linearAxisLeft.MinorGridlineStyle = LineStyle.Dot;
+                linearAxisLeft.Title = "HR";
+                linearAxisLeft.Key = "HR";
+                linearAxisLeft.Position = AxisPosition.Left;
+                linearAxisLeft.Minimum = 10.0;
+                linearAxisLeft.Maximum = 250.0;
+                linearAxisLeft.AxislineColor = OxyColors.Magenta;
+                linearAxisLeft.TextColor = OxyColors.Magenta;
+                linearAxisLeft.TitleColor = OxyColors.Magenta;
+                _plotModel.Axes.Add(linearAxisLeft);
 
-            plotModel1.Series.Add(seriesSP);
+                var linearAxisRight = new LinearAxis();
+
+                linearAxisRight.MajorGridlineStyle = LineStyle.Solid;
+                linearAxisRight.MinorGridlineStyle = LineStyle.Dot;
+                linearAxisRight.Position = AxisPosition.Right;
+                linearAxisRight.Title = "%SpO2";
+                linearAxisRight.Key = "SP";
+                linearAxisRight.Minimum = 50.0;
+                linearAxisRight.Maximum = 100.0;
+                linearAxisRight.AxislineColor = OxyColors.Yellow;
+                linearAxisRight.TitleColor = OxyColors.Yellow;
+                linearAxisRight.TextColor = OxyColors.Yellow;
+                _plotModel.Axes.Add(linearAxisRight);
+
+                seriesHR = new LineSeries
+                {
+                    Title = "Heart Rate (bpm)",
+                          Color = OxyColors.Magenta,
+                          MarkerType = MarkerType.Circle,
+                          MarkerSize = 3,
+                          MarkerStroke = OxyColors.Magenta,
+                          MarkerFill = OxyColors.Magenta,
+                          YAxisKey = "HR",
+                          MarkerStrokeThickness = 1.0,
+                          StrokeThickness = 5
+                };
+
+                _plotModel.Series.Add(seriesHR);
+
+                seriesSP = new LineSeries()
+                {
+                    Title = "Oxygen Saturation Level (%)",
+                          Color = OxyColors.Yellow,
+                          MarkerType = MarkerType.Circle,
+                          MarkerSize = 3,
+                          MarkerStroke = OxyColors.Yellow,
+                          MarkerFill = OxyColors.Yellow,
+                          YAxisKey = "SP",
+                          MarkerStrokeThickness = 1.0,
+                          StrokeThickness = 5
+                };
+
+                _plotModel.Series.Add(seriesSP);
+            }
+
+            plotView = FindViewById<PlotView>(Resource.Id.plotViewModel);
+    
+            if (plotView.Model == null)
+                plotView.Model = _plotModel;
 
             Button_start_hr_Click(null, null);
+
+            MyModel.InvalidatePlot(true);
         }
 
         protected override void OnDestroy()
         {
+            wakeLock.Release();
             _heartRate?.Stop();
-
             base.OnDestroy();
         }
 
