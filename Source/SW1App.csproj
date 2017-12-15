@@ -97,6 +97,7 @@
     <Compile Include="LogViewActivity.cs" />
   </ItemGroup>
   <ItemGroup>
+    <AndroidAsset Include="Assets\TT4110_JavaScript_GK-ST_StudentWorkbook_20170313.pdf" />
     <None Include="packages.config" />
     <None Include="Resources\AboutResources.txt" />
     <None Include="Assets\AboutAssets.txt" />
