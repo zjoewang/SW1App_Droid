@@ -1,5 +1,5 @@
 ﻿//
-// Copyright (c) 2017 Equine Smart Bits, LLC. All rights reserved
+// Copyright (c) 2017-2018 Equine Smart Bits, LLC. All rights reserved
 
 using System;
 using System.Collections.Generic;
@@ -47,7 +47,7 @@ namespace ESB
 	class MainActivity : Activity
 	{
 		static readonly string TAG = typeof(MainActivity).Name;
-        string build_number = "0.008";
+        string build_number = "0.01";
 		ListView listView;
 		TextView progressBarTitle;
 		ProgressBar progressBar;

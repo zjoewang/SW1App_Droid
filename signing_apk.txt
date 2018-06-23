@@ -1,0 +1,2 @@
+alias esb
+passwd 19870101

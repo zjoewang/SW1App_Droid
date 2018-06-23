@@ -33,6 +33,8 @@ namespace ESB
         PlotView plotView = null;
         static int curHR = -1;
         static int curSP = -1;
+        static int nowHR = -1;
+        static int nowSP = -1;
         static int curTS = 0;
         static double curTemp = 0;
         private PowerManager.WakeLock wakeLock;
@@ -177,30 +179,49 @@ namespace ESB
 
         void UpdateUI(int header, int val)
         {
-            if (header == 0)
-            {
-                curHR = val;
-                ++curTS;
-                seriesHR.Points.Add(new DataPoint(curTS, curHR));
-            }
-            else if (header == 1)
-            {
-                curSP = val;
-                seriesSP.Points.Add(new DataPoint(curTS, curSP));
-            }
-            else if (header == 2)
-                curTemp = (double) val / 10.0;     // val is in 1/10th Fehrenhait unit
+            bool bRfresh = false;
 
-            // Thnning data so we don't accumulate too much historical data
-            if (seriesHR.Points.Count > 200)
+            switch (header)
             {
-                seriesHR.Points.RemoveRange(0, 50);
-                seriesSP.Points.RemoveRange(0, 50);
+                case 0:
+                    curHR = val;
+                    ++curTS;
+                    seriesHR.Points.Add(new DataPoint(curTS, curHR));
+                    if (seriesHR.Points.Count > 200)
+                        seriesHR.Points.RemoveRange(0, 50);
+                    break;
+
+                case 1:
+                    curSP = val;
+                    seriesSP.Points.Add(new DataPoint(curTS, curSP));
+                    if (seriesSP.Points.Count > 200)
+                        seriesSP.Points.RemoveRange(0, 50);
+                    break;
+
+                case 2:
+                    curTemp = (double) val / 10.0;     // val is in 1/10th Fehrenhait unit
+                    break;
+
+                case 3:
+                    nowHR = val;
+                    break;
+
+                case 4:
+                    nowSP = val;
+                    bRfresh = true;
+                    break;
+
+                default:
+                    break;
             }
 
-            MyModel.Title = string.Format("HR = {0} bpm, SP = {1}%", curHR, curSP);
-            MyModel.Subtitle = string.Format($"T = {curTemp} F");
-            MyModel.InvalidatePlot(true);
+            if (bRfresh)
+            {
+                MyModel.Title = string.Format("HR = {0} bpm, SP = {1}%", curHR, curSP);
+                MyModel.Subtitle = string.Format("T = {0} F, rHR = {1}, rSP = {2}%", curTemp, nowHR, nowSP);
+                MyModel.InvalidatePlot(true);
+            }
+          
         }
     }
 }
