@@ -41,7 +41,7 @@ namespace ESB
 			base.OnPause();
 		}
 
-		protected async override void OnResume ()
+		protected override void OnResume ()
 		{
 			Log.Info(TAG, "OnResume");
 			base.OnResume();

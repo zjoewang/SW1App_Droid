@@ -93,7 +93,7 @@ namespace ESB
             {
                 s_sr = new StreamWriter(filename, true);
             }
-            catch (Exception e)
+            catch (Exception /*e*/)
             {
                 s_sr = null;
                 return false;

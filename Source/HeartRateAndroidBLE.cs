@@ -156,7 +156,7 @@ namespace ESB
             try
             {
                 _characteristicHR.ValueUpdated -= CharacteristicHR_ValueUpdated;
-                _characteristicHR.StopUpdates();
+                await _characteristicHR.StopUpdatesAsync();
 
                 await _adapter.DisconnectDeviceAsync(_device);
 
@@ -260,7 +260,7 @@ namespace ESB
                             _cancelScanningForDevice();
 
                             _characteristicHR.ValueUpdated += CharacteristicHR_ValueUpdated;
-                            _characteristicHR.StartUpdates();
+                            await _characteristicHR.StartUpdatesAsync();
                             _log("_adapter_DeviceDiscovered", $"Device {e.Device.Name} STARTED");
                         }
                     }

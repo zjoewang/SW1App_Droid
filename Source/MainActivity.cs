@@ -74,29 +74,29 @@ namespace ESB
             buttonData = FindViewById<Button>(Resource.Id.button1);
             buttonChart = FindViewById<Button>(Resource.Id.button2);
 
-            listView.ItemClick += async (sender, e) => {
-                await OnItemClick(sender, e);
+            listView.ItemClick += (sender, e) => {
+                OnItemClick(sender, e);
             };
         }
 
-        protected override async void OnResume()
+        protected override void OnResume()
 		{
 			base.OnResume ();
 
-			listView.ItemClick += async (sender, e) => {
-				await OnItemClick(sender, e);
+			listView.ItemClick += (sender, e) => {
+				OnItemClick(sender, e);
 			};
 
-            buttonData.Click += async (sender, e) => {
-                await OnButtonDataClicked(sender, e);
+            buttonData.Click += (sender, e) => {
+                OnButtonDataClicked(sender, e);
             };
 
-            buttonChart.Click += async (sender, e) => {
-                await OnButtonChartClicked(sender, e);
+            buttonChart.Click += (sender, e) => {
+                OnButtonChartClicked(sender, e);
             };
 		}
 
-        async Task OnButtonDataClicked(object sender, EventArgs e)
+        void OnButtonDataClicked(object sender, EventArgs e)
         {
             if (_hrEnumerator == null)
             {
@@ -124,7 +124,7 @@ namespace ESB
                 listAdapter.Add($"{sender.GetType().ToString()}:{deviceName}");
         }
 
-        async Task OnButtonChartClicked(object sender, EventArgs e)
+        void OnButtonChartClicked(object sender, EventArgs e)
         {
             if (_hrEnumerator != null)
             {
@@ -148,11 +148,11 @@ namespace ESB
 
 		}
 
-		async Task OnItemClick(object sender, AdapterView.ItemClickEventArgs e)
+		void OnItemClick(object sender, AdapterView.ItemClickEventArgs e)
 		{
 			Log.Info(TAG, "Pressed item " + e.Position);
 
-            await OnButtonChartClicked(sender, e);
+            OnButtonChartClicked(sender, e);
 
             string selected = (string)listView.GetItemAtPosition(e.Position);
 
