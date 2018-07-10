@@ -14,6 +14,7 @@ using Android.Views;
 using Android.Widget;
 using System.Globalization;
 using System.Threading;
+using Android.Content.PM;
 
 namespace ESB
 {
@@ -47,8 +48,8 @@ namespace ESB
 	class MainActivity : Activity
 	{
 		static readonly string TAG = typeof(MainActivity).Name;
-        string build_number = "0.01";
-		ListView listView;
+        string build_number;
+        ListView listView;
 		TextView progressBarTitle;
 		ProgressBar progressBar;
         Button buttonData;
@@ -60,7 +61,11 @@ namespace ESB
 		{
 			base.OnCreate(bundle);
 
-			SetContentView(Resource.Layout.Main);
+            PackageManager manager = this.PackageManager;
+            PackageInfo info = manager.GetPackageInfo(this.PackageName, 0);
+            build_number = info.VersionName;
+
+            SetContentView(Resource.Layout.Main);
 
             listAdapter = new USBDeviceListAdapter(this);
 
