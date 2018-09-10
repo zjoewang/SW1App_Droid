@@ -16,6 +16,9 @@ using System.Globalization;
 using System.Threading;
 using Android.Content.PM;
 using Android;
+using Plugin.Permissions;
+using Plugin.Permissions.Abstractions;
+using Permission = Plugin.Permissions.Abstractions.Permission;
 
 namespace ESB
 {
@@ -57,6 +60,8 @@ namespace ESB
         Button buttonChart;
         private USBDeviceListAdapter listAdapter;
         private IHeartRateEnumerator _hrEnumerator;
+
+        /*
         readonly string[] PermissionsLocation =
             {
                 Manifest.Permission.AccessCoarseLocation,
@@ -101,8 +106,9 @@ namespace ESB
                     break;
             }
         }
+        */
 
-        protected override void OnCreate(Bundle bundle)
+        protected async override void OnCreate(Bundle bundle)
 		{
 			base.OnCreate(bundle);
 
@@ -127,6 +133,32 @@ namespace ESB
             listView.ItemClick += (sender, e) => {
                 OnItemClick(sender, e);
             };
+
+            bool permitted = false;
+
+            try
+            {
+                var status = await CrossPermissions.Current.CheckPermissionStatusAsync(Permission.Location);
+                if (status != PermissionStatus.Granted)
+                {
+                    if (await CrossPermissions.Current.ShouldShowRequestPermissionRationaleAsync(Permission.Location))
+                    {
+                        Application.Current.MainPage.DisplayAlert("Need location", "Gunna need that location", "OK");
+                    }
+
+                    var results = await CrossPermissions.Current.RequestPermissionsAsync(Permission.Location);
+                    //Best practice to always check that the key exists
+                    if (results.ContainsKey(Permission.Location))
+                        status = results[Permission.Location];
+                }
+
+                if (status == PermissionStatus.Granted)
+                    permitted = true;
+            }
+            catch (Exception ex)
+            {
+                permitted = false;
+            }
         }
 
         protected override void OnResume()
