@@ -298,6 +298,9 @@ namespace ESB
                     header = (bytes[2] >> 4);        // First 4 bits
                     heartValue = bytes[1] | ((0xF & bytes[2]) << 8);       // Next 12
 
+                    if (heartValue == 0xFFF)
+                        heartValue = -1;
+
                     if (_update_func != null)
                         await _update_func(header, heartValue);
                 }
@@ -305,7 +308,9 @@ namespace ESB
                 {
                     header = 0;
                     heartValue = bytes[1];
-                    System.Diagnostics.Debug.Assert(false);
+
+                    if (_update_func != null)
+                        await _update_func(header, heartValue);
                 }
 
                 if (_currentValue == null)

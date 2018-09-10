@@ -15,6 +15,7 @@ using Android.Widget;
 using System.Globalization;
 using System.Threading;
 using Android.Content.PM;
+using Android;
 
 namespace ESB
 {
@@ -56,6 +57,50 @@ namespace ESB
         Button buttonChart;
         private USBDeviceListAdapter listAdapter;
         private IHeartRateEnumerator _hrEnumerator;
+        readonly string[] PermissionsLocation =
+            {
+                Manifest.Permission.AccessCoarseLocation,
+                Manifest.Permission.AccessFineLocation
+            };
+        const int RequestLocationId = 0;
+
+        bool GetPermissions()
+        {
+            if ((int)Build.VERSION.SdkInt < 23)
+                return true;
+
+            //Check to see if any permission in our group is available, if one, then all are
+            const string permission = Manifest.Permission.AccessFineLocation;
+            
+            if (CheckSelfPermission(permission) == (int)Permission.Granted)
+                return true;
+
+            //Finally request permissions with the list of permissions and Id
+            RequestPermissions(PermissionsLocation, RequestLocationId);
+
+            return false;
+        }
+
+        public override async void OnRequestPermissionsResult(int requestCode, string[] permissions, Permission[] grantResults)
+        {
+            switch (requestCode)
+            {
+                case RequestLocationId:
+                    {
+                        if (grantResults[0] == Permission.Granted)
+                        {
+                            ;       // good
+                        }
+                        else
+                        {
+                            //Permission Denied :(
+                            //Disabling location functionality
+                            ;       // sorry
+                        }
+                    }
+                    break;
+            }
+        }
 
         protected override void OnCreate(Bundle bundle)
 		{
