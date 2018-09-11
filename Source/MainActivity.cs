@@ -108,6 +108,12 @@ namespace ESB
         }
         */
 
+        public override void OnRequestPermissionsResult(int requestCode, string[] permissions, [GeneratedEnum] Android.Content.PM.Permission[] grantResults)
+        {
+            PermissionsImplementation.Current.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+            base.OnRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+
         protected async override void OnCreate(Bundle bundle)
 		{
 			base.OnCreate(bundle);
@@ -134,6 +140,8 @@ namespace ESB
                 OnItemClick(sender, e);
             };
 
+            Plugin.CurrentActivity.CrossCurrentActivity.Current.Init(this, bundle);
+
             bool permitted = false;
 
             try
@@ -143,7 +151,7 @@ namespace ESB
                 {
                     if (await CrossPermissions.Current.ShouldShowRequestPermissionRationaleAsync(Permission.Location))
                     {
-                        Application.Current.MainPage.DisplayAlert("Need location", "Gunna need that location", "OK");
+                        ;
                     }
 
                     var results = await CrossPermissions.Current.RequestPermissionsAsync(Permission.Location);
@@ -155,10 +163,13 @@ namespace ESB
                 if (status == PermissionStatus.Granted)
                     permitted = true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 permitted = false;
             }
+
+            if (!permitted)
+                Finish();
         }
 
         protected override void OnResume()
