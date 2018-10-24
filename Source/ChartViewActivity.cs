@@ -37,6 +37,9 @@ namespace ESB
         static int nowSP = -1;
         static int curTS = 0;
         static double curTemp = 0;
+        static double soc = 0.0;
+        static double humid = 0.0;
+        static int display_state = 1;       // 1: current HR and SPo2%, 2: SOC% and humidity%
         private PowerManager.WakeLock wakeLock;
 
         protected override void OnCreate(Bundle bundle)
@@ -211,6 +214,14 @@ namespace ESB
                     bRfresh = true;
                     break;
 
+                case 5:
+                    humid = (double) val / 10.0;
+                    break;
+
+                case 6:
+                    soc = (double) val / 10.0;
+                    break;
+
                 default:
                     break;
             }
@@ -218,7 +229,18 @@ namespace ESB
             if (bRfresh)
             {
                 MyModel.Title = string.Format("HR = {0} bpm, SP = {1}%", curHR, curSP);
-                MyModel.Subtitle = string.Format("T = {0} F, rHR = {1}, rSP = {2}%", curTemp, nowHR, nowSP);
+
+                if (display_state == 1)
+                {
+                    MyModel.Subtitle = string.Format("T = {0} F, rHR = {1}, rSP = {2}%", curTemp, nowHR, nowSP);
+                    display_state = 2;
+                }
+                else
+                {
+                    MyModel.Subtitle = string.Format("SOC = {0}%, RHumid = {1}%", soc, humid);
+                    display_state = 1;
+                }
+                
                 MyModel.InvalidatePlot(true);
             }
           
